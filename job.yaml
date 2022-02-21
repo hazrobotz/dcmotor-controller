@@ -1,0 +1,14 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: client-job
+spec:
+  template:
+    spec:
+      containers:
+      - name: client
+        image: controller
+        command: ["python", "controller.py", "req", "eth", "dcmotor-service.default.svc.cluster.local", "8000/0", "test"]
+      restartPolicy: Never
+  backoffLimit: 1
+
