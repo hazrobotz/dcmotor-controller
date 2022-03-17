@@ -7,7 +7,7 @@ spec:
     spec:
       containers:
       - name: client
-        image: controller
+        image: ghcr.io/hazrobotz/dcmotor-controller:main
         command: ["python", "controller.py", "req", "eth", "dcmotor-service.default.svc.cluster.local", "8000/0", "test"]
       restartPolicy: Never
   backoffLimit: 1
