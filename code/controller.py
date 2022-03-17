@@ -46,20 +46,21 @@ crashed = False #If the program crashed
 #strip off trailing slash and http, if present.
 host = host.split('http://')[-1].strip('/')
 
-ykernel = 'butterfly2'
-yamplitude = 2.0
-yfrequency = 1.0/100.00
+ykernel = 'cos'
+yamplitude = 3.0
+yfrequency = 1.0/300.00
 psikernel = 'butterfly1'
-psiamplitude = 0*pi/180
-psifrequency = 1.0/125.0
-xkernel = 'butterfly1'
-xamplitude = 2.0
-xfrequency = 1.0/100.00
+psiamplitude = 0*pi/380
+psifrequency = 1.0/375.0
+xkernel = 'cos'
+xamplitude = 3.0
+xfrequency = 1.0/200.00
 
 u_max=20;
 CumulativeError = 0
 
-pid = PID(1, 0.05, 0.001, setpoint=90)
+pid = PID(.1, 0.1, 0.001, setpoint=0)
+pid.output_limits = (-5, 5)  
 control = 0
 
 def controlloop(signum, _):
@@ -85,7 +86,7 @@ def controlloop(signum, _):
         control = pid(thetadot)
         tr = clock() - t0
         #Write the logs
-        print("%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.5g\t%.5g" % (theta,thetadot,t,control,error,tr,StateTime))
+        print("%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.5g\t%.5g" % (theta,thetadot,t,control,error,tr-t,StateTime))
     except:
         print("Failed to control at %s seconds || Because %s"%(t,exc_info()) )
 

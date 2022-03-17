@@ -13,7 +13,7 @@ def initialize_handshake(HOST, PORT):    # setup socket and start the connection
 # Method to read URL
 def process(HOST, PORT, GET, client = None):
         try:
-            data = session.get("http://"+HOST+":"+str(PORT)+GET, timeout=.150)
+            data = session.get("http://"+HOST+":"+str(PORT)+GET, timeout=.750)
             response = data.text;
             m = search('\[(.+?)\]', response)
             if m:
