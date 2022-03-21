@@ -4,6 +4,7 @@ import timeit
 import signal
 from simple_pid import PID
 from references import *
+import utils
 from math import pi
 
 #Take arguments to determine file name, port, etc.
@@ -16,9 +17,9 @@ try:
     clientport = 0;
     dur= float(argv[6]) if len(argv) > 6 else 3 * 3600
     h= float(argv[7]) if len(argv) > 7 else .02
-    KpR= float(argv[8]) if len(argv) > 8 else -.312-1
-    KiR= float(argv[9]) if len(argv) > 9 else 0
-    KdR= float(argv[10]) if len(argv) > 10 else 1.299
+    KpR= float(argv[8]) if len(argv) > 8 else 0.1
+    KiR= float(argv[9]) if len(argv) > 9 else 0.1
+    KdR= float(argv[10]) if len(argv) > 10 else 0.001
     KpM= float(argv[11]) if len(argv) > 11 else 5.79
     KiM= float(argv[12]) if len(argv) > 12 else 0
     KdM= float(argv[13]) if len(argv) > 13 else .22
@@ -28,11 +29,9 @@ except:
 	exit(1)
  
 from requestsclient import *
-initialize_handshake(host, port)
-#Log data to the correct file
+initialize_handshake(host, port, True)
+
 clock = timeit.default_timer
-t0 = clock()
-t=0
 
 #Performance parameters
 iteration = 0 #Keep track of loop iterations
@@ -46,20 +45,15 @@ crashed = False #If the program crashed
 #strip off trailing slash and http, if present.
 host = host.split('http://')[-1].strip('/')
 
-ykernel = 'cos'
-yamplitude = 3.0
-yfrequency = 1.0/300.00
-psikernel = 'butterfly1'
-psiamplitude = 0*pi/380
-psifrequency = 1.0/375.0
-xkernel = 'cos'
-xamplitude = 3.0
-xfrequency = 1.0/200.00
+# / get these from mds (xkernel, xamplitude, xfrequency)
+xkernel = None
+xamplitude = None
+xfrequency = None
 
 u_max=20;
 CumulativeError = 0
 
-pid = PID(.1, 0.1, 0.001, setpoint=0)
+pid = PID(KpR, KiR, KdR, setpoint=0)
 pid.output_limits = (-5, 5)  
 control = 0
 
@@ -86,25 +80,34 @@ def controlloop(signum, _):
         control = pid(thetadot)
         tr = clock() - t0
         #Write the logs
-        print("%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.5g\t%.5g" % (theta,thetadot,t,control,error,tr-t,StateTime))
+        print("%.4f\t%.4f\t%.5f\t%.4f\t%.4f\t%.5g\t%.5f" % (theta,thetadot,t,control,error,tr-t,StateTime))
     except:
         print("Failed to control at %s seconds || Because %s"%(t,exc_info()) )
 
 if __name__ == "__main__":
     url = "/init?value0=0&time=0"
     process(host,port,url,clientport)
+    taskmetadata = utils.gettaskmds()
+    xkernel = taskmetadata["xkernel"]
+    xamplitude = taskmetadata["xamplitude"]
+    xfrequency = 1/taskmetadata["xperiod"]
+    utils.initjobmds(xkernel, xamplitude, xfrequency)
 
     #(timer, interrupt)=(signal.ITIMER_PROF, signal.SIGPROF)
     (timer, interrupt)=(signal.ITIMER_REAL, signal.SIGALRM)
     signal.signal(interrupt, controlloop)
     signal.setitimer(timer, h, h)
-  
+
+    t0 = clock()
+    t=0
+
     #Stop program after duration
     while t < dur and crashed == False:
         pass
-  
+
     # Stop timer and plant
     #signal.setitimer(signal.ITIMER_REAL, 0, h)
     signal.setitimer(signal.ITIMER_PROF, 0, h)
     url = "/init?value0=0&time=0"
+    utils.finishjobmds()
     process(host,port,url,clientport)
