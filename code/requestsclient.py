@@ -5,16 +5,26 @@ from re import search
 from sys import exc_info
 
 session = None
+token = ""
 
-def initialize_handshake(HOST, PORT):    # setup socket and start the connection to the model
+def initialize_handshake(HOST, PORT, login=False):    # setup socket and start the connection to the model
     global session
     session = requests.Session()
+    if login:
+        gettoken(HOST, PORT)
+
+def gettoken(HOST, PORT):
+    global token
+    data = session.get("http://"+HOST+":"+str(PORT)+"/login", timeout=2)
+    token = "/%s"%data.url.split("/")[3]
+    if data.status_code == 500 or data.status_code == 400:
+        raise("Could not login to a plant")
 
 # Method to read URL
 def process(HOST, PORT, GET, client = None):
         try:
-            data = session.get("http://"+HOST+":"+str(PORT)+GET, timeout=.750)
-            response = data.text;
+            data = session.get("http://"+HOST+":"+str(PORT)+"%s"%token+GET, timeout=.750)
+            response = data.text
             m = search('\[(.+?)\]', response)
             if m:
                 response = m.groups()[-1]
