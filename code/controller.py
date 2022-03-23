@@ -106,8 +106,8 @@ if __name__ == "__main__":
         pass
 
     # Stop timer and plant
-    #signal.setitimer(signal.ITIMER_REAL, 0, h)
-    signal.setitimer(signal.ITIMER_PROF, 0, h)
+    signal.setitimer(timer, 0, 0)
+    signal.alarm(0)
     url = "/init?value0=0&time=0"
     utils.finishjobmds()
     process(host,port,url,clientport)
