@@ -22,14 +22,13 @@ def inittaskmds():
 
     #connect to the service, access the task database
     dbclient = CouchDB(db_name, db_pass, url=db_uri, connect=True)
-    dbclient['tasks']
 
-    if 'tasks' in dbclient:
+    if 'tasks' in dbclient.keys(remote=True):
         db = dbclient['tasks']
     else:
         db = dbclient.create_database('tasks')
 
-    if task not in db:
+    if task not in db.keys(remote=True):
         my_document = db.create_document(data)
         my_document.save()
     else:
@@ -39,13 +38,13 @@ def gettaskmds():
     task = os.getenv('TASK', "widget1")
     #connect to the service, access the task database
     dbclient = CouchDB(db_name, db_pass, url=db_uri, connect=True)
-    dbclient['tasks']
-    if 'tasks' in dbclient:
+
+    if 'tasks' in dbclient.keys(remote=True):
         db = dbclient['tasks']
     else:
         raise ValueError("No metadata for tasks")
 
-    if task in db:
+    if task in db.keys(remote=True):
         return db[task]["data"]
     else:
         raise ValueError("Task does not exist in the MDS")
@@ -62,14 +61,13 @@ def initjobmds(kernel, amplitude, frequency):
         }
     #connect to the service, access the job database
     dbclient = CouchDB(db_name, db_pass, url=db_uri, connect=True)
-    dbclient['jobs']
 
-    if 'jobs' in dbclient:
+    if 'jobs' in dbclient.keys(remote=True):
         db = dbclient['jobs']
     else:
         db = dbclient.create_database('jobs')
     
-    if job_name not in db:
+    if job_name not in db.keys(remote=True):
         my_document = db.create_document(data)
         my_document.save()
     else:
@@ -78,8 +76,8 @@ def initjobmds(kernel, amplitude, frequency):
 def finishjobmds():
     #connect to the service, access the job database
     dbclient = CouchDB(db_name, db_pass, url=db_uri, connect=True)
-    dbclient['jobs']
-    if 'jobs' in dbclient:
+
+    if 'jobs' in dbclient.keys(remote=True):
         db = dbclient['jobs']
     else:
         raise("Jobs DB does not exist")
