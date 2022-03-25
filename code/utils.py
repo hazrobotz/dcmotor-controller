@@ -9,13 +9,21 @@ db_pass = os.getenv('DB_PASS')
 db_uri = os.getenv('MDS_URI')
 
 def inittaskmds():
-    task="widget1"
-    data = {
-        '_id': task, 
+    data1 = {
+        '_id': "widget1", 
         'data': {
             'xkernel': "cos",
             'xamplitude': 3,
-            'xfrequency': .02
+            'xperiod': 200
+        },
+        'creation_date': timeit.default_timer()
+    }
+    data2 = {
+        '_id': "widget2", 
+        'data': {
+            'xkernel': "sin",
+            'xamplitude': 3,
+            'xperiod': 200
         },
         'creation_date': timeit.default_timer()
     }
@@ -29,7 +37,9 @@ def inittaskmds():
         db = dbclient.create_database('tasks')
 
     if task not in db.keys(remote=True):
-        my_document = db.create_document(data)
+        my_document = db.create_document(data1)
+        my_document.save()
+        my_document = db.create_document(data2)
         my_document.save()
     else:
         raise ValueError("Task already initialized")
@@ -39,10 +49,10 @@ def gettaskmds():
     #connect to the service, access the task database
     dbclient = CouchDB(db_name, db_pass, url=db_uri, connect=True)
 
-    if 'tasks' in dbclient.keys(remote=True):
-        db = dbclient['tasks']
-    else:
-        raise ValueError("No metadata for tasks")
+    if 'tasks' not in dbclient.keys(remote=True):
+        inittaskmds()
+        #raise ValueError("No metadata for tasks")
+    db = dbclient['tasks']
 
     if task in db.keys(remote=True):
         return db[task]["data"]
