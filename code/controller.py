@@ -50,11 +50,11 @@ xkernel = None
 xamplitude = None
 xfrequency = None
 
-u_max=20;
+u_max=0.3378;
 CumulativeError = 0
 
 pid = PID(KpR, KiR, KdR, setpoint=0)
-pid.output_limits = (-5, 5)  
+pid.output_limits = (-u_max, u_max)  
 control = 0
 
 def controlloop(signum, _):
