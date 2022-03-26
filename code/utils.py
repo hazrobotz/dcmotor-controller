@@ -16,7 +16,7 @@ def inittaskmds():
             'xamplitude': 3,
             'xperiod': 200
         },
-        'creation_date': timeit.default_timer()
+        'creation_date': timeit.time.time()
     }
     data2 = {
         '_id': "widget2", 
@@ -25,7 +25,7 @@ def inittaskmds():
             'xamplitude': 3,
             'xperiod': 200
         },
-        'creation_date': timeit.default_timer()
+        'creation_date': timeit.time.time()
     }
 
     #connect to the service, access the task database
