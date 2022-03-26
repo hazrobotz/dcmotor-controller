@@ -82,7 +82,7 @@ def controlloop(signum, _):
         #Write the logs
         print("%.4f\t%.4f\t%.5f\t%.4f\t%.4f\t%.5g\t%.5f" % (theta,thetadot,t,control,error,tr-t,StateTime))
     except:
-        print("Failed to control at %s seconds || Because %s"%(t,exc_info()) )
+        print("Failed to control at %s seconds || Because %s"%(t,exc_info()[1]) )
 
 if __name__ == "__main__":
     url = "/init?value0=0&time=0"

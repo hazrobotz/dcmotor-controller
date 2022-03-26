@@ -23,13 +23,13 @@ def gettoken(HOST, PORT):
 # Method to read URL
 def process(HOST, PORT, GET, client = None):
         try:
-            data = session.get("http://"+HOST+":"+str(PORT)+"%s"%token+GET, timeout=.750)
+            data = session.get("http://"+HOST+":"+str(PORT)+"%s"%token+GET, timeout=.50)
             response = data.text
             m = search('\[(.+?)\]', response)
             if m:
                 response = m.groups()[-1]
         except:
-                print("Did not get response: ", exc_info())
+                print("Did not get response: ", exc_info()[0])
                 response = (GET.split("time=")[1]).split("&")[0]
         return response
 
