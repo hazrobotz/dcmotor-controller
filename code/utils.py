@@ -36,13 +36,10 @@ def inittaskmds():
     else:
         db = dbclient.create_database('tasks')
 
-    if task not in db.keys(remote=True):
-        my_document = db.create_document(data1)
-        my_document.save()
-        my_document = db.create_document(data2)
-        my_document.save()
-    else:
-        raise ValueError("Task already initialized")
+    my_document = db.create_document(data1)
+    my_document.save()
+    my_document = db.create_document(data2)
+    my_document.save()
 
 def gettaskmds():
     task = os.getenv('TASK', "widget1")
