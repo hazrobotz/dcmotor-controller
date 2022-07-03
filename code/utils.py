@@ -42,7 +42,7 @@ def inittaskmds():
     my_document.save()
 
 def gettaskmds():
-    task = os.getenv('TASK', "widget1")
+    task = os.getenv('TASK', "widget1").strip("\"")
     #connect to the service, access the task database
     dbclient = CouchDB(db_name, db_pass, url=db_uri, connect=True)
 
