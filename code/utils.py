@@ -4,9 +4,9 @@ import os
 import timeit
 
 job_name = os.getenv('HOSTNAME')
-db_name = os.getenv('DB_NAME')
-db_pass = os.getenv('DB_PASS')
-db_uri = os.getenv('MDS_URI')
+db_name = os.getenv('DB_NAME').strip("\"")
+db_pass = os.getenv('DB_PASS').strip("\"")
+db_uri = os.getenv('MDS_URI').strip("\"")
 
 def inittaskmds():
     data1 = {
