@@ -1,5 +1,5 @@
 import timeit
-from cloudant.client import CouchDB
+import couchdb
 import os
 import timeit
 
@@ -29,29 +29,27 @@ def inittaskmds():
     }
 
     #connect to the service, access the task database
-    dbclient = CouchDB(db_name, db_pass, url=db_uri, connect=True)
+    dbclient = couchdb.Server("http://%s:%s@%s"%(db_name,db_pass,db_uri))
 
-    if 'tasks' in dbclient.keys(remote=True):
+    if 'tasks' in dbclient:
         db = dbclient['tasks']
     else:
-        db = dbclient.create_database('tasks')
+        db = dbclient.create('tasks')
 
-    my_document = db.create_document(data1)
-    my_document.save()
-    my_document = db.create_document(data2)
-    my_document.save()
+    db.save(data1)
+    db.save(data2)
 
 def gettaskmds():
     task = os.getenv('TASK', "widget1")
     #connect to the service, access the task database
-    dbclient = CouchDB(db_name, db_pass, url=db_uri, connect=True)
+    dbclient = couchdb.Server("http://%s:%s@%s"%(db_name,db_pass,db_uri))
 
-    if 'tasks' not in dbclient.keys(remote=True):
+    if 'tasks' not in dbclient:
         inittaskmds()
         #raise ValueError("No metadata for tasks")
     db = dbclient['tasks']
 
-    if task in db.keys(remote=True):
+    if task in db:
         return db[task]["data"]
     else:
         raise ValueError("Task does not exist in the MDS")
@@ -67,24 +65,23 @@ def initjobmds(kernel, amplitude, frequency):
         'start_date': timeit.time.time()
         }
     #connect to the service, access the job database
-    dbclient = CouchDB(db_name, db_pass, url=db_uri, connect=True)
+    dbclient = couchdb.Server("http://%s:%s@%s"%(db_name,db_pass,db_uri))
 
-    if 'jobs' in dbclient.keys(remote=True):
+    if 'jobs' in dbclient:
         db = dbclient['jobs']
     else:
-        db = dbclient.create_database('jobs')
+        db = dbclient.create('jobs')
     
-    if job_name not in db.keys(remote=True):
-        my_document = db.create_document(data)
-        my_document.save()
+    if job_name not in db.:
+        db.save(data)
     else:
         raise ValueError("Job already initialized")
 
 def finishjobmds():
     #connect to the service, access the job database
-    dbclient = CouchDB(db_name, db_pass, url=db_uri, connect=True)
+    dbclient = couchdb.Server("http://%s:%s@%s"%(db_name,db_pass,db_uri))
 
-    if 'jobs' in dbclient.keys(remote=True):
+    if 'jobs' in dbclient:
         db = dbclient['jobs']
     else:
         raise("Jobs DB does not exist")
@@ -95,3 +92,11 @@ def finishjobmds():
         db[job_name].save()
     else:
         raise ValueError("Job %s does not exist"%job_name)
+
+
+    if 'data' in dbclient:
+        db = dbclient['data']
+    else:
+        db = dbclient.create('data')
+    db[job_name+".log"]={}
+    db.put_attachment(db[job_name+".log"], open("somelogs.log"), job_name+".log")
