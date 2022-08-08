@@ -5,12 +5,12 @@ import os
 import timeit
 
 job_name = os.getenv('HOSTNAME')
-db_name = os.getenv('DB_NAME')
-db_pass = os.getenv('DB_PASS')
-db_uri = os.getenv('DB_URI')
-queue_uri = os.getenv('QUEUE_URI')
-queue_name = os.getenv('QUEUE_NAME')
-queue_pass = os.getenv('QUEUE_PASS')
+db_name = os.getenv('DB_NAME').strip("\"")
+db_pass = os.getenv('DB_PASS').strip("\"")
+db_uri = os.getenv('DB_URI').strip("\"")
+queue_uri = os.getenv('QUEUE_URI').strip("\"")
+queue_name = os.getenv('QUEUE_NAME').strip("\"")
+queue_pass = os.getenv('QUEUE_PASS').strip("\"")
 
 def inittaskmds():
     data1 = {
@@ -44,7 +44,7 @@ def inittaskmds():
     db.save(data2)
 
 def gettaskmds():
-    task = os.getenv('TASK', "widget1")
+    task = os.getenv('TASK', "widget1").strip("\"")
     #connect to the service, access the task database
     dbclient = couchdb.Server("http://%s:%s@%s"%(db_name,db_pass,db_uri))
 
