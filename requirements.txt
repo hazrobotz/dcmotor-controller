@@ -1,3 +1,4 @@
 requests
 couchdb
 simple-pid
+pika

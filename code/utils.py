@@ -1,12 +1,16 @@
 import timeit
 import couchdb
+import pika
 import os
 import timeit
 
 job_name = os.getenv('HOSTNAME')
 db_name = os.getenv('DB_NAME')
 db_pass = os.getenv('DB_PASS')
-db_uri = os.getenv('MDS_URI')
+db_uri = os.getenv('DB_URI')
+queue_uri = os.getenv('QUEUE_URI')
+queue_name = os.getenv('QUEUE_NAME')
+queue_pass = os.getenv('QUEUE_PASS')
 
 def inittaskmds():
     data1 = {
@@ -72,7 +76,7 @@ def initjobmds(kernel, amplitude, frequency):
     else:
         db = dbclient.create('jobs')
     
-    if job_name not in db.:
+    if job_name not in db:
         db.save(data)
     else:
         raise ValueError("Job already initialized")
@@ -100,3 +104,11 @@ def finishjobmds():
         db = dbclient.create('data')
     db[job_name+".log"]={}
     db.put_attachment(db[job_name+".log"], open("somelogs.log"), job_name+".log")
+
+    connection = pika.BlockingConnection(pika.ConnectionParameters(queue_uri))
+    channel = connection.channel()
+    channel.queue_declare(queue='toinspect')
+    channel.basic_publish(exchange='',
+                      routing_key='toinspect',
+                      body=job_name)
+    connection.close()
