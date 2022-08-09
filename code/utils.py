@@ -105,9 +105,9 @@ def finishjobmds():
     db[job_name+".log"]={}
     db.put_attachment(db[job_name+".log"], open("somelogs.log"), job_name+".log")
 
-    connection = pika.BlockingConnection(pika.ConnectionParameters(queue_uri))
+    connection = pika.BlockingConnection(pika.URLParameters(queue_uri))
     channel = connection.channel()
-    channel.queue_declare(queue='toinspect')
+    channel.queue_declare(queue='toinspect', durable=False)
     channel.basic_publish(exchange='',
                       routing_key='toinspect',
                       body=job_name)
