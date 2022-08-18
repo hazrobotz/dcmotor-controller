@@ -93,7 +93,6 @@ def finishjobmds():
     if job_name in db:
         db[job_name]['completion_date']=timeit.time.time()
         db[job_name]['output_file']=job_name+".log"
-        db[job_name].save()
     else:
         raise ValueError("Job %s does not exist"%job_name)
 
@@ -103,7 +102,7 @@ def finishjobmds():
     else:
         db = dbclient.create('data')
     db[job_name+".log"]={}
-    db.put_attachment(db[job_name+".log"], open("somelogs.log"), job_name+".log")
+    db.put_attachment(db[job_name+".log"], open(job_name+".log"), job_name+".log")
 
     connection = pika.BlockingConnection(pika.URLParameters(queue_uri))
     channel = connection.channel()
