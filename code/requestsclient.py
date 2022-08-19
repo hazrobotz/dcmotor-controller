@@ -17,8 +17,11 @@ def gettoken(HOST, PORT):
     global token
     data = session.get("http://"+HOST+":"+str(PORT)+"/login", timeout=2)
     token = "/%s"%data.url.split("/")[3]
-    if data.status_code == 500 or data.status_code == 400:
-        raise("Could not login to a plant")
+    if data.status_code != 200 and data.status_code != 202:
+        data = session.get("http://"+HOST+":"+str(PORT)+"/0", timeout=2)
+        token = "/0"
+        if data.status_code != 200 and data.status_code != 202:
+            raise("Could not login to a plant")
 
 # Method to read URL
 def process(HOST, PORT, GET, client = None):
