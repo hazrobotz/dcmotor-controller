@@ -6,7 +6,9 @@ from simple_pid import PID
 from references import *
 import utils
 from math import pi
+import os
 
+log = open(os.getenv('HOSTNAME',"logfile")+'.log', "w")
 #Take arguments to determine file name, port, etc.
 try:
     client = argv[1]
@@ -20,9 +22,7 @@ try:
     KpR= float(argv[8]) if len(argv) > 8 else 0.1
     KiR= float(argv[9]) if len(argv) > 9 else 0.1
     KdR= float(argv[10]) if len(argv) > 10 else 0.001
-    KpM= float(argv[11]) if len(argv) > 11 else 5.79
-    KiM= float(argv[12]) if len(argv) > 12 else 0
-    KdM= float(argv[13]) if len(argv) > 13 else .22
+
 except:
 	print(exc_info())
 	print("Usage: nlcontroller_current [client(udp,tcp,dccp,...)] [network(eth, wifi)] [host] [port] [suffix] duration STEPSIZE KPball KIball KDball KPbeam KIbeam KDbeam")
@@ -80,7 +80,7 @@ def controlloop(signum, _):
         control = pid(thetadot)
         tr = clock() - t0
         #Write the logs
-        print("%.4f\t%.4f\t%.5f\t%.4f\t%.4f\t%.5g\t%.5f" % (theta,thetadot,t,control,error,tr-t,StateTime))
+        print("%.4f\t%.4f\t%.5f\t%.4f\t%.4f\t%.5g\t%.5f" % (theta,thetadot,t,control,error,tr-t,StateTime), file=log)
     except:
         print("Failed to control at %s seconds || Because %s"%(t,exc_info()[1]) )
 
