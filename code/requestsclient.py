@@ -15,25 +15,24 @@ def initialize_handshake(HOST, PORT, login=False):    # setup socket and start t
 
 def gettoken(HOST, PORT):
     global token
-    data = session.get("http://"+HOST+":"+str(PORT)+"/login", timeout=2)
+    data = requests.get("http://"+HOST+":"+str(PORT)+"/login", timeout=2)
     token = "/%s"%data.url.split("/")[3]
     if data.status_code != 200 and data.status_code != 202:
-        data = session.get("http://"+HOST+":"+str(PORT)+"/0", timeout=2)
+        data = requests.get("http://"+HOST+":"+str(PORT)+"/0", timeout=2)
         token = "/0"
         if data.status_code != 200 and data.status_code != 202:
-            raise("Could not login to a plant")
+            raise ValueError("Could not login to a plant")
 
 # Method to read URL
 def process(HOST, PORT, GET, client = None):
         try:
-            data = session.get("http://"+HOST+":"+str(PORT)+"%s"%token+GET, timeout=.50)
+            data = requests.get("http://"+HOST+":"+str(PORT)+"%s"%token+GET, timeout=4.50)
             response = data.text
             m = search('\[(.+?)\]', response)
             if m:
                 response = m.groups()[-1]
         except:
-                print("Did not get response: ", exc_info()[0])
-                response = (GET.split("time=")[1]).split("&")[0]
+                raise ValueError("Did not get response: ", exc_info(), (GET.split("time=")[1]).split("&")[0])
         return response
 
 if __name__ == "__main__":

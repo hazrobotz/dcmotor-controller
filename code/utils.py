@@ -102,7 +102,7 @@ def finishjobmds():
     else:
         db = dbclient.create('data')
     db[job_name+".log"]={}
-    db.put_attachment(db[job_name+".log"], open(job_name+".log"), job_name+".log")
+    db.put_attachment(db[job_name+".log"], open("/tmp/"+job_name+".log"), job_name+".log")
 
     connection = pika.BlockingConnection(pika.URLParameters(queue_uri))
     channel = connection.channel()

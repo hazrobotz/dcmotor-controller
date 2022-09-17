@@ -5,10 +5,9 @@ import signal
 from simple_pid import PID
 from references import *
 import utils
-from math import pi
 import os
 
-log = open(os.getenv('HOSTNAME',"logfile")+'.log', "w")
+log = open("/tmp/"+os.getenv('HOSTNAME',"logfile")+'.log', "w")
 #Take arguments to determine file name, port, etc.
 try:
     client = argv[1]
@@ -57,6 +56,11 @@ pid = PID(KpR, KiR, KdR, setpoint=0)
 pid.output_limits = (-u_max, u_max)  
 control = 0
 
+def saveandclose(signum, _):
+    log.close()
+    utils.finishjobmds()
+    exit()
+
 def controlloop(signum, _):
     global t, StateTime, control
     global tcrash, crashed, iteration, mse_x, mse_y
@@ -81,8 +85,13 @@ def controlloop(signum, _):
         tr = clock() - t0
         #Write the logs
         print("%.4f\t%.4f\t%.5f\t%.4f\t%.4f\t%.5g\t%.5f" % (theta,thetadot,t,control,error,tr-t,StateTime), file=log)
+        print("%.4f\t%.4f\t%.5f\t%.4f\t%.4f\t%.5g\t%.5f" % (theta,thetadot,t,control,error,tr-t,StateTime))
     except:
-        print("Failed to control at %s seconds || Because %s"%(t,exc_info()[1]) )
+        # print("Failed to control at %s seconds || Because %s"%(t,exc_info()[1]) )
+        if t > dur + 10: 
+            print("Should not be here at %s seconds || Because %s"%(t,exc_info()[1]) )
+            signal.setitimer(signal.ITIMER_REAL, 0, 0)
+            # saveandclose( _, _)
 
 if __name__ == "__main__":
     url = "/init?value0=0&time=0"
@@ -95,9 +104,13 @@ if __name__ == "__main__":
 
     #(timer, interrupt)=(signal.ITIMER_PROF, signal.SIGPROF)
     (timer, interrupt)=(signal.ITIMER_REAL, signal.SIGALRM)
-    signal.signal(interrupt, controlloop)
-    signal.setitimer(timer, h, h)
-
+    # signal.signal(interrupt, controlloop)
+    # signal.setitimer(timer, h, h)
+    signal.signal(signal.SIGALRM, controlloop)
+    signal.setitimer(signal.ITIMER_REAL, h, h)
+ 
+    signal.signal(signal.SIGPROF, saveandclose)
+    signal.setitimer(signal.ITIMER_PROF, dur+10, 0)
     t0 = clock()
     t=0
 
@@ -105,9 +118,11 @@ if __name__ == "__main__":
     while t < dur and crashed == False:
         pass
 
-    # Stop timer and plant
-    signal.setitimer(timer, 0, 0)
-    signal.alarm(0)
-    url = "/init?value0=0&time=0"
+    log.close()
+    # url = "/init?value0=0&time=0"
     utils.finishjobmds()
-    process(host,port,url,clientport)
+    # process(host,port,url,clientport)
+    # Stop timer and plant
+    # signal.setitimer(timer, 0, 0)
+    # signal.signal(interrupt, exit())
+    signal.alarm(0)
